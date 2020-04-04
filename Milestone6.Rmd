@@ -341,6 +341,16 @@ names(constituency_data)
 
 ```
 
+#Replication Description 
+
+I replicated 4 tables. The first was table 1, which showed the effect of female incumbency on female attitudes towards IPV. The second table showed the effect of female incumbency on male attitudes towards IPV. The third table showed the effect of female incumbency on pre-treatment attitudes towards IPV with the Placebo Test. The models that I haven't replicated are the descriptive statistics models and models used to run statitstics on the dependent variables. These models are not part of the main results of the paper 
+
+#Proposed Extension
+
+
+
+![Original Table in Paper I am replicating](milestone5_screenshot.png)
+
 
 # References
 
