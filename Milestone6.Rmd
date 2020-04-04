@@ -1,0 +1,347 @@
+---
+title: "Milestone6"
+author: "Feven Yohannes"
+date: "April 3, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)  
+
+library(readr)
+library(dplyr)
+library(lmtest)
+library(tinytex)
+
+#Need this to run coeftest
+
+library(sandwich)
+
+#Need this to run vcovHc
+
+library(rstanarm)
+library(stargazer)
+library(tidyverse)
+
+#Reading in the data 
+
+budget <- read_csv("dataverse_files/replication_file_jop/data/budget_results.csv", col_types = cols(
+  .default = col_double(),
+  kab.x = col_character(),
+  kab.y = col_character()
+))
+
+constituency_data  <- read_csv("dataverse_files/replication_file_jop/data/pub_opinion_results.csv",
+                           col_types = cols(
+  .default = col_double(),
+  dapil = col_character()
+                           ))
+
+candidate_data  <- read_csv("dataverse_files/replication_file_jop/data/candidate_2019_data.csv",
+                           col_types = cols(
+  .default = col_double(),
+  dapil = col_character()
+                           ))
+
+center_data  <- read_csv("dataverse_files/replication_file_jop/data/center_data.csv",
+                           col_types = cols(
+  .default = col_double(),
+  dapil = col_character()
+                           ))
+
+gender_data  <- read_csv("dataverse_files/replication_file_jop/data/dapil_gender_composition.csv",
+                           col_types = cols(
+  .default = col_double(),
+  dapil = col_character()
+                           ))
+
+election_data  <- read_csv("dataverse_files/replication_file_jop/data/election_characteristics_balance.csv",
+                           col_types = cols(
+  .default = col_double(),
+  dapil = col_character()
+                           ))
+
+gender_estimation_data  <- read_csv("dataverse_files/replication_file_jop/data/estimation_sample_dapils_w_gender.csv",
+                           col_types = cols(
+  .default = col_double(),
+  dapil = col_character()
+                           ))
+  
+laws_data  <- read_csv("dataverse_files/replication_file_jop/data/laws_dprd_2009.csv",
+                           col_types = cols(
+  .default = col_double(),
+  dapil = col_character()
+                           ))
+
+public_opinion_individual_data  <- read_csv("dataverse_files/replication_file_jop/data/pub_opinion_results_individual.csv",
+                           col_types = cols(
+  .default = col_double(),
+  dapil = col_character()
+                           ))
+```
+
+^[All analysis for this paper can be found on this repo link : ]
+
+Overview of the paper:
+
+Nicholas Kuipers' paper "The Effect of Electing Female Candidates on Attitudes Towards Intimate Partner Violence", examines how electing female candidates in local elections in Indonesia can lead to a decrease in intimate partner violence. He specifically looks at elections where the female candidate narrowly wins. Overall he finds that a female victory in local elections leads to an increase in female constituents and male constituents (although not as much) condemning domestic abuse.
+
+Kuipers introduces other countries in which the relationship between female representation in government and attitudes towards IPV (intimate partner violence) is significant. For example, India saw that an increase in female representation led to more enactment of policies that targeted domestic abuse. In the case of Indonesia, Kuipers explains the importance of analyzing IPV and policies as domestic abuse has affected almost half of the female population and Indonesia has been experiencing institutional reform.
+
+In his experiment, Kuipers examines the effect of electing female candidates to the Dewan Perwakilan Rakyat Daerah, a legislative body in Indonesia. He estimates the effect of adding an additional female lawmaker to the legislative body on tolerance levels of IPV among constituents. To measure the attitudes towards IPV, Kuipers used the USAID Demographic and HealthnSurvey (DHS), which was conducted in 2012 as a nationally representative survey of middle-aged women and men. The main results showed that electing females did affect constituent's beliefs toward IPV. For example "Electing a female legislator leads a 6.4 percentage point drop in the proportion of women who say it is acceptable to beat one’s wife if she goes out without telling her husband". Kuipers claims that the reason for this change in attitude may be because of laws that female politicians tend to enact in regard to domestic abuse. Female politicians may allocate more resources in awareness, helping victims, or strengthened laws that prohibit or punish domestic abuse. After examining some of these reasons, Kuipers found that female legislators have a large effect on policy implications and empower people to condemn IPV.
+
+Graphic 
+```{r}
+#Making a graphic with budget data
+
+constituency_data <- as.data.frame(constituency_data)
+
+graphic <- constituency_data %>% 
+  select("win_margin","dapil") %>%
+  arrange(desc(win_margin)) %>%
+  head(n= 7) %>%
+  ggplot(aes(x=dapil,y=win_margin)) + geom_col(fill="blue") + 
+  coord_flip() +
+  labs(title = "Measuring female win margins in local regions in Indonesia",
+       subtitle = "Looking at the top 7 closest election races",
+              x = "Local Region", y = "Win Margin")
+
+graphic
+```
+
+Appendix
+
+```{r,results="asis"}
+#Replication code for table 1
+
+mod_fem1 <- lm(v744a_f2012 ~ woman_win, data = constituency_data)
+mod_fem2 <- lm(v744b_f2012 ~ woman_win, data = constituency_data)
+mod_fem3 <- lm(v744c_f2012 ~ woman_win, data = constituency_data)
+mod_fem4 <- lm(v744d_f2012 ~ woman_win, data = constituency_data)
+mod_fem5 <- lm(v744e_f2012 ~ woman_win, data = constituency_data)
+mod_fem7 <- lm(add_index_f2012 ~ woman_win, data = constituency_data)
+
+observations <- c(nobs(mod_fem1),nobs(mod_fem2),nobs(mod_fem3),nobs(mod_fem4),nobs(mod_fem5),nobs(mod_fem7))
+
+mod_fem1 <- coeftest(mod_fem1, vcov=vcovHC(mod_fem1,type="HC0"))
+mod_fem2 <- coeftest(mod_fem2, vcov=vcovHC(mod_fem2,type="HC0"))
+mod_fem3 <- coeftest(mod_fem3, vcov=vcovHC(mod_fem3,type="HC0"))
+mod_fem4 <- coeftest(mod_fem4, vcov=vcovHC(mod_fem4,type="HC0"))
+mod_fem5 <- coeftest(mod_fem5, vcov=vcovHC(mod_fem5,type="HC0"))
+mod_fem7 <- coeftest(mod_fem7, vcov=vcovHC(mod_fem7,type="HC0"))
+
+table <- list(mod_fem1, mod_fem2, mod_fem3, mod_fem4, mod_fem5, mod_fem7)
+
+note_text <- paste("Beta coefficients from OLS regression. Standard errors were calculated using the huber-white (HC0) correction. The outcomes are drawn from a battery of questions that asked respondents if it was acceptable to beat one's wife if she: (1) goes out without telling her husband; (2) neglects her children; (3) argues with her husband; (4) refuses sex; (5) burns the food. The index is an additive measure.")
+
+table = stargazer(table,
+                  title = "Effect of Female Incumbency on Female Attitudes Towards IPV",
+                  label = 'tab:table_female',
+                  model.names = F,
+                  model.numbers = T,
+                  #column.separate = c(6),
+                  column.labels = c("Goes out", "Neglects children", "Argues", "Refuses sex", "Burns food", "Index"),
+                  
+                  multicolumn = T,
+                  dep.var.labels = c("Is it okay to beat one's wife if she:"), 
+                  add.lines = list(c("Observations", observations),
+                                   c('Bandwidth', rep(c('1\\%'), 6))),
+                  covariate.labels = c("Female Incumbency"),
+                  star.cutoffs = c(0.05, 0.01),
+                  #float.env = 'sidewaystable',
+                  keep.stat = c("n"),
+                  notes = NULL,
+                  notes.align = 'l')
+
+table
+
+#Reading in table 2 
+#female respondent results
+
+mod_mal1 <- lm(v744a_m2012 ~ woman_win, data = constituency_data)
+mod_mal2 <- lm(v744b_m2012 ~ woman_win, data = constituency_data)
+mod_mal3 <- lm(v744c_m2012 ~ woman_win, data = constituency_data)
+mod_mal4 <- lm(v744d_m2012 ~ woman_win, data = constituency_data)
+mod_mal5 <- lm(v744e_m2012 ~ woman_win, data = constituency_data)
+mod_mal7 <- lm(add_index_m2012 ~ woman_win, data = constituency_data)
+
+observations <- c(nobs(mod_mal1),nobs(mod_mal2),nobs(mod_mal3),nobs(mod_mal4),nobs(mod_mal5),nobs(mod_mal7))
+
+mod_mal1 <- coeftest(mod_mal1, vcov=vcovHC(mod_mal1,type="HC0"))
+mod_mal2 <- coeftest(mod_mal2, vcov=vcovHC(mod_mal2,type="HC0"))
+mod_mal3 <- coeftest(mod_mal3, vcov=vcovHC(mod_mal3,type="HC0"))
+mod_mal4 <- coeftest(mod_mal4, vcov=vcovHC(mod_mal4,type="HC0"))
+mod_mal5 <- coeftest(mod_mal5, vcov=vcovHC(mod_mal5,type="HC0"))
+mod_mal7 <- coeftest(mod_mal7, vcov=vcovHC(mod_mal7,type="HC0"))
+
+table <- list(mod_mal1, mod_mal2, mod_mal3, mod_mal4, mod_mal5, mod_mal7)
+
+note_text <- paste("Beta coefficients from OLS regression. Standard errors were calculated using the huber-white (HC0) correction. The outcomes are drawn from a battery of questions that asked respondents if it was acceptable to beat one’s wife if she: (1) goes out without telling her husband; (2) neglects her children; (3) argues with her husband; (4) refuses sex; (5) burns the food. The index is an additive measure.")
+
+table2 = stargazer(table,
+                  title = "Effect of Female Incumbency on Male Attitudes Towards IPV",
+                  label = 'tab:table_male',
+                  model.names = F,
+                  model.numbers = T,
+                  #column.separate = c(6),
+                  column.labels = c("Goes out", "Neglects children", "Argues", "Refuses sex", "Burns food", "Index"),
+                  
+                  multicolumn = T,
+                  dep.var.labels = c("Is it okay to beat one's wife if she:"), 
+                  add.lines = list(c("Observations", observations),
+                                   c('Bandwidth', rep(c('1\\%'), 6))),
+                  covariate.labels = c("Female Incumbency"),
+                  star.cutoffs = c(0.05, 0.01),
+                  #float.env = 'sidewaystable',
+                  keep.stat = c("n"),
+                  notes = NULL,
+                  notes.align = 'l')
+
+#Reading in table 3
+
+#Another table showing female respondent results 
+
+mod2007_fem1 <- lm(v744a_f2007 ~ woman_win, data = constituency_data)
+mod2007_fem2 <- lm(v744b_f2007 ~ woman_win, data = constituency_data)
+mod2007_fem3 <- lm(v744c_f2007 ~ woman_win, data = constituency_data)
+mod2007_fem4 <- lm(v744d_f2007 ~ woman_win, data = constituency_data)
+mod2007_fem5 <- lm(v744e_f2007 ~ woman_win, data = constituency_data)
+mod2007_fem7 <- lm(add_index_f2007 ~ woman_win, data = constituency_data)
+
+observations <- c(nobs(mod2007_fem1),nobs(mod2007_fem2),nobs(mod2007_fem3),
+                  nobs(mod2007_fem4),nobs(mod2007_fem5),nobs(mod2007_fem7))
+
+
+mod2007_fem1 <- coeftest(mod2007_fem1, vcov=vcovHC(mod2007_fem1,type="HC0"))
+mod2007_fem2 <- coeftest(mod2007_fem2, vcov=vcovHC(mod2007_fem2,type="HC0"))
+mod2007_fem3 <- coeftest(mod2007_fem3, vcov=vcovHC(mod2007_fem3,type="HC0"))
+mod2007_fem4 <- coeftest(mod2007_fem4, vcov=vcovHC(mod2007_fem4,type="HC0"))
+mod2007_fem5 <- coeftest(mod2007_fem5, vcov=vcovHC(mod2007_fem5,type="HC0"))
+mod2007_fem7 <- coeftest(mod2007_fem7, vcov=vcovHC(mod2007_fem7,type="HC0"))
+
+
+#Male Respondent 
+mod2007_mal1 <- lm(v744a_m2007 ~ woman_win, data = constituency_data)
+mod2007_mal2 <- lm(v744b_m2007 ~ woman_win, data = constituency_data)
+mod2007_mal3 <- lm(v744c_m2007 ~ woman_win, data = constituency_data)
+mod2007_mal4 <- lm(v744d_m2007 ~ woman_win, data = constituency_data)
+mod2007_mal5 <- lm(v744e_m2007 ~ woman_win, data = constituency_data)
+mod2007_mal7 <- lm(add_index_m2007 ~ woman_win, data = constituency_data)
+
+observations_male <- c(nobs(mod2007_mal1),nobs(mod2007_mal2),nobs(mod2007_mal3),
+                       nobs(mod2007_mal4),nobs(mod2007_mal5),nobs(mod2007_mal7))
+
+
+mod2007_mal1 <- coeftest(mod2007_mal1, vcov=vcovHC(mod2007_mal1,type="HC0"))
+mod2007_mal2 <- coeftest(mod2007_mal2, vcov=vcovHC(mod2007_mal2,type="HC0"))
+mod2007_mal3 <- coeftest(mod2007_mal3, vcov=vcovHC(mod2007_mal3,type="HC0"))
+mod2007_mal4 <- coeftest(mod2007_mal4, vcov=vcovHC(mod2007_mal4,type="HC0"))
+mod2007_mal5 <- coeftest(mod2007_mal5, vcov=vcovHC(mod2007_mal5,type="HC0"))
+mod2007_mal7 <- coeftest(mod2007_mal7, vcov=vcovHC(mod2007_mal7,type="HC0"))
+
+
+table_3a <- list(mod2007_fem1, mod2007_mal1, mod2007_fem2, mod2007_mal2, mod2007_fem3, mod2007_mal3, 
+              mod2007_fem4, mod2007_mal4, mod2007_fem5, mod2007_mal5)
+
+note_text <- paste(" Beta coefficients from OLS regression. Decimals rounded to two digits to maintain alignment. Standard errors were calculated using the huber-white (HC0) correction. The outcomes are drawn from a battery of questions that asked respondents if it was acceptable to beat one's wife if she: (1) goes out without telling her husband; (2) neglects her children; (3) argues with her husband; (4) refuses sex; (5) burns the food. The index is an additive measure.")
+
+#I named this next table 3a1 because it seemts like its using the moedels from table 3a
+
+table_3a1 = stargazer(table,
+                  title = "Effect of Female Incumbency on Pre-treatment Attitudes Towards IPV (Placebo Test)",
+                  label = 'tab:placebo',
+                  model.names = F,
+                  model.numbers = T,
+                  #column.separate = c(6),
+                  column.separate = c(2,2,2,2,2,2),
+                  column.labels = c("Goes out", "Neglects children", "Argues", "Refuses sex", "Burns food", "Index"),
+                  
+                  multicolumn = T,
+                  dep.var.labels = c("Is it okay to beat one's wife if she:"), 
+                  add.lines = list(c("Observations", rep(observations, 2)),
+                                   c('Bandwidth', rep(c('1\\%'), 12)),
+                                   c("Gender", rep(c("F", "M"), 6))),
+                  covariate.labels = c("Female"),
+                  star.cutoffs = c(0.05, 0.01),
+                  digits = 3,
+                  #float.env = 'sidewaystable',
+                  keep.stat = c("n"),
+                  notes = NULL,
+                  notes.align = 'l')
+
+
+table_3b <- list(mod2007_fem1, mod2007_mal1, mod2007_fem2, mod2007_mal2, mod2007_fem3, mod2007_mal3, 
+              mod2007_fem4, mod2007_mal4, mod2007_fem5, mod2007_mal5, mod2007_fem7, mod2007_mal7)
+
+note_text <- paste(" Beta coefficients from OLS regression. Decimals rounded to two digits to maintain alignment. Heteroskedastic consistent standard errors were calculated using the huber-white (HC0) correction. The outcomes are drawn from a battery of questions that asked respondents if it was acceptable to beat one's wife if she: (1) goes out without telling her husband; (2) neglects her children; (3) argues with her husband; (4) refuses sex; (5) burns the food. The index is an additive measure.")
+
+#This next table is using information from the table above
+
+table_3b1 = stargazer(table,
+                  title = "Effect of Female Incumbency on Pre-treatment Female Support for IPV (Placebo Test)",
+                  label = 'tab:placebo_full',
+                  model.names = F,
+                  model.numbers = T,
+                  #column.separate = c(6),
+                  column.separate = c(2,2,2,2,2,2),
+                  column.labels = c("Goes out", "Neglects children", "Argues", "Refuses sex", "Burns food", "Index"),
+                  
+                  multicolumn = T,
+                  dep.var.labels = c("Is it okay to beat one's wife if she:"), 
+                  add.lines = list(c("Observations", rep(observations, 2)),
+                                   c('Bandwidth', rep(c('1\\%'), 12)),
+                                   c("Gender", rep(c("F", "M"), 6))),
+                  covariate.labels = c("Female"),
+                  star.cutoffs = c(0.05, 0.01),
+                  digits = 3,
+                  #float.env = 'sidewaystable',
+                  keep.stat = c("n"),
+                  notes = NULL,
+                  notes.align = 'l')
+
+#Table_a3
+#Looks at dependent variables for both males and females 
+
+note_text <- paste("")
+
+
+
+table_a3 = stargazer(constituency_data, 
+                  title = "Descriptive Statistics (Female Respondent Outcomes)",
+                  label = 'tab:dso',
+                  summary = T,
+                  keep = c(7, 8, 9, 10, 11, 12),
+                  covariate.labels = c("Goes out", "Neglects children", "Argues", "Refuses sex", "Burns food", "Additive index")
+                  )
+
+#I took out this write latex part bc my latex doesn't work
+#write_latex_plain(table, note_text, './outputs/tables/descriptives_outcomes.tex')
+
+note_text <- paste("")
+
+
+table_a3_2 = stargazer(constituency_data,
+                  title = "Descriptive Statistics (Male Respondent Outcomes)",
+                  label = 'tab:dso_male',
+                  summary = T,
+                  keep = c(25, 26, 27, 28, 29, 30),
+                  covariate.labels = c("Goes out", "Neglects children", "Argues", "Refuses sex", "Burns food", "Additive index")
+)
+
+
+#write_latex_plain(table, note_text, './outputs/tables/descriptives_outcomes_male.tex')
+
+
+
+stargazer(constituency_data, keep = 13)
+
+names(constituency_data)
+
+
+
+```
+
+
+# References
+
+I make use of @Kuipers2019, @Beaman2017, @Chattopadhyay2007, @Cooper2020, @Vintila2017
