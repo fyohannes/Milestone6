@@ -2,7 +2,7 @@
 title: "Milestone6"
 author: "Feven Yohannes"
 date: "April 3, 2020"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -80,7 +80,7 @@ public_opinion_individual_data  <- read_csv("dataverse_files/replication_file_jo
                            ))
 ```
 
-^[All analysis for this paper can be found on this repo link : ]
+^[All analysis for this paper can be found on this repo link :https://github.com/fyohannes/Milestone6 ]
 
 Overview of the paper:
 
@@ -135,7 +135,7 @@ table <- list(mod_fem1, mod_fem2, mod_fem3, mod_fem4, mod_fem5, mod_fem7)
 note_text <- paste("Beta coefficients from OLS regression. Standard errors were calculated using the huber-white (HC0) correction. The outcomes are drawn from a battery of questions that asked respondents if it was acceptable to beat one's wife if she: (1) goes out without telling her husband; (2) neglects her children; (3) argues with her husband; (4) refuses sex; (5) burns the food. The index is an additive measure.")
 
 table = stargazer(table,
-                  title = "Effect of Female Incumbency on Female Attitudes Towards IPV",
+                  title = "Effect of Female Incumbency on Female Attitudes Towards IPV", 
                   label = 'tab:table_female',
                   model.names = F,
                   model.numbers = T,
@@ -153,7 +153,6 @@ table = stargazer(table,
                   notes = NULL,
                   notes.align = 'l')
 
-table
 
 #Reading in table 2 
 #female respondent results
@@ -347,6 +346,7 @@ I replicated 4 tables. The first was table 1, which showed the effect of female 
 
 #Proposed Extension
 
+The proposed extension that I have for this project is to analyze the effect that budgets have on IPV public opinions. Kuiper claims that a possible reason for the effect of female candidates on IPV opinion is through their encactment of legislation. This would also include buedget setting, thus I hope to examine how large the effects of budjet setting and allocation of budget for awareness etc, is on publuc opinion of IPV. 
 
 
 ![Original Table in Paper I am replicating](milestone5_screenshot.png)
