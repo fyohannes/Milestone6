@@ -111,7 +111,7 @@ graphic
 
 Appendix
 
-```{r,results="asis"}
+```{r,results="asis",warning=FALSE}
 #Replication code for table 1
 
 mod_fem1 <- lm(v744a_f2012 ~ woman_win, data = constituency_data)
@@ -301,7 +301,7 @@ table_3b1 = stargazer(table,
 #Table_a3
 #Looks at dependent variables for both males and females 
 
-note_text <- paste("")
+#note_text <- paste("")
 
 
 
@@ -316,7 +316,7 @@ table_a3 = stargazer(constituency_data,
 #I took out this write latex part bc my latex doesn't work
 #write_latex_plain(table, note_text, './outputs/tables/descriptives_outcomes.tex')
 
-note_text <- paste("")
+#note_text <- paste("")
 
 
 table_a3_2 = stargazer(constituency_data,
@@ -332,9 +332,9 @@ table_a3_2 = stargazer(constituency_data,
 
 
 
-stargazer(constituency_data, keep = 13)
+#stargazer(constituency_data, keep = 13)
 
-names(constituency_data)
+#names(constituency_data)
 
 
 
