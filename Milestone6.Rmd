@@ -114,14 +114,23 @@ Appendix
 ```{r,results="asis",warning=FALSE}
 #Replication code for table 1
 
+#These fitted lines model the relationship between female incumbency and public opinions on 5 questions. These five questions incude 1)Is it okay to beat one's wife if she goes out?  2)Is it okay to beat one's wife if she neglects the kids?  3)Is it okay to beat one's wife if she argues? 4)Is it okay to beat one's wife if she refuses food ? 5) Is it okay to beat one's wife if she burns food?
+
 mod_fem1 <- lm(v744a_f2012 ~ woman_win, data = constituency_data)
 mod_fem2 <- lm(v744b_f2012 ~ woman_win, data = constituency_data)
 mod_fem3 <- lm(v744c_f2012 ~ woman_win, data = constituency_data)
 mod_fem4 <- lm(v744d_f2012 ~ woman_win, data = constituency_data)
 mod_fem5 <- lm(v744e_f2012 ~ woman_win, data = constituency_data)
+
+#This added an index of the prior information onto the table
+
 mod_fem7 <- lm(add_index_f2012 ~ woman_win, data = constituency_data)
 
+#Nobs computes the number of non-missing observations
+
 observations <- c(nobs(mod_fem1),nobs(mod_fem2),nobs(mod_fem3),nobs(mod_fem4),nobs(mod_fem5),nobs(mod_fem7))
+
+#Coefests is an inference for estimated coefficents on the models
 
 mod_fem1 <- coeftest(mod_fem1, vcov=vcovHC(mod_fem1,type="HC0"))
 mod_fem2 <- coeftest(mod_fem2, vcov=vcovHC(mod_fem2,type="HC0"))
@@ -130,9 +139,13 @@ mod_fem4 <- coeftest(mod_fem4, vcov=vcovHC(mod_fem4,type="HC0"))
 mod_fem5 <- coeftest(mod_fem5, vcov=vcovHC(mod_fem5,type="HC0"))
 mod_fem7 <- coeftest(mod_fem7, vcov=vcovHC(mod_fem7,type="HC0"))
 
+#Made the models with their respective coefficents into a table 
+
 table <- list(mod_fem1, mod_fem2, mod_fem3, mod_fem4, mod_fem5, mod_fem7)
 
 note_text <- paste("Beta coefficients from OLS regression. Standard errors were calculated using the huber-white (HC0) correction. The outcomes are drawn from a battery of questions that asked respondents if it was acceptable to beat one's wife if she: (1) goes out without telling her husband; (2) neglects her children; (3) argues with her husband; (4) refuses sex; (5) burns the food. The index is an additive measure.")
+
+#Used stargazer to make the table
 
 table = stargazer(table,
                   title = "Effect of Female Incumbency on Female Attitudes Towards IPV", 
@@ -155,7 +168,8 @@ table = stargazer(table,
 
 
 #Reading in table 2 
-#female respondent results
+
+#These lines of code do the same thing that the previous table did, however, rather than predicting female respondent results, it predicts male respondent results. 
 
 mod_mal1 <- lm(v744a_m2012 ~ woman_win, data = constituency_data)
 mod_mal2 <- lm(v744b_m2012 ~ woman_win, data = constituency_data)
@@ -199,6 +213,9 @@ table2 = stargazer(table,
 #Reading in table 3
 
 #Another table showing female respondent results 
+#This table runs the hypothetical placebo effect for both males and females of the models prior
+
+#These models are specific to females
 
 mod2007_fem1 <- lm(v744a_f2007 ~ woman_win, data = constituency_data)
 mod2007_fem2 <- lm(v744b_f2007 ~ woman_win, data = constituency_data)
@@ -219,7 +236,8 @@ mod2007_fem5 <- coeftest(mod2007_fem5, vcov=vcovHC(mod2007_fem5,type="HC0"))
 mod2007_fem7 <- coeftest(mod2007_fem7, vcov=vcovHC(mod2007_fem7,type="HC0"))
 
 
-#Male Respondent 
+#These models are specific to males
+
 mod2007_mal1 <- lm(v744a_m2007 ~ woman_win, data = constituency_data)
 mod2007_mal2 <- lm(v744b_m2007 ~ woman_win, data = constituency_data)
 mod2007_mal3 <- lm(v744c_m2007 ~ woman_win, data = constituency_data)
